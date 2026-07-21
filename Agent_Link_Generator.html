@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRT · Agent Link Generator</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #f9fafb; min-height: 100vh; padding-bottom: 48px; }
+  .header { background: #111827; padding: 28px 20px 24px; margin-bottom: 20px; }
+  .header-label { font-size: 11px; color: #6b7280; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+  .header-title { font-size: 22px; font-weight: 800; color: #fff; line-height: 1.2; }
+  .header-sub { font-size: 13px; color: #9ca3af; margin-top: 4px; }
+  .container { padding: 0 16px; max-width: 480px; margin: 0 auto; }
+  .section { background: #fff; border-radius: 16px; padding: 24px 20px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); border: 1px solid #f0f0f0; }
+  .section-title { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; color: #9ca3af; text-transform: uppercase; margin-bottom: 16px; }
+  label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+  .hint { font-size: 11px; color: #9ca3af; font-weight: 400; margin-top: 4px; margin-bottom: 14px; }
+  input[type=text] { width: 100%; padding: 12px 14px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px; font-family: inherit; margin-bottom: 14px; }
+  input[type=text]:focus { outline: none; border-color: #111827; }
+  .lang-btns { display: flex; gap: 8px; margin-bottom: 16px; }
+  .lang-btn { flex: 1; padding: 12px; border-radius: 10px; border: 2px solid #e5e7eb; background: #fff; color: #374151; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+  .lang-btn.active { border-color: #111827; background: #111827; color: #fff; }
+  .gen-btn { width: 100%; padding: 15px; background: #111827; color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 800; font-family: inherit; cursor: pointer; }
+  .gen-btn:active { transform: scale(0.99); }
+  .out { display: none; }
+  .link-box { background: #f9fafb; border: 2px dashed #d1d5db; border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #374151; word-break: break-all; line-height: 1.5; margin-bottom: 12px; }
+  .row-btns { display: flex; gap: 8px; margin-bottom: 8px; }
+  .act-btn { flex: 1; padding: 12px; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; }
+  .act-copy { background: #111827; color: #fff; }
+  .act-wa { background: #25d366; color: #fff; }
+  .act-btn:active { transform: scale(0.98); }
+  .qr-wrap { text-align: center; margin-top: 8px; }
+  .qr-wrap img { width: 180px; height: 180px; border-radius: 12px; border: 1px solid #f0f0f0; }
+  .qr-cap { font-size: 11px; color: #9ca3af; margin-top: 8px; }
+  .intro-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 14px; font-size: 13px; color: #166534; line-height: 1.6; white-space: pre-wrap; margin-top: 12px; }
+  .footer { font-size: 11px; color: #9ca3af; text-align: center; line-height: 1.6; margin-top: 8px; }
+  .setup { font-size: 11px; color: #9ca3af; line-height: 1.6; }
+  details { margin-top: 8px; }
+  summary { font-size: 12px; font-weight: 700; color: #6b7280; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">TRT Advisory · Internal Tool</div>
+  <div class="header-title">Agent Link Generator</div>
+  <div class="header-sub">Make your own branded CI calculator link in 30 seconds.</div>
+</div>
+
+<div class="container">
+  <div class="section">
+    <div class="section-title">Your Details</div>
+
+    <label>Name 名字</label>
+    <input type="text" id="in-name" placeholder="e.g. Ky Tan" oninput="maybeLive()">
+
+    <label>WhatsApp Number 号码</label>
+    <input type="text" id="in-phone" placeholder="e.g. 60123456789 (no +, start with 60)" oninput="maybeLive()">
+    <div class="hint">Malaysian format: 60 + number, no spaces or "+". Example: 012-345 6789 → 60123456789</div>
+
+    <label>Title / Tagline 职称 (optional)</label>
+    <input type="text" id="in-title" placeholder="e.g. Financial Advisor · TRT Advisory" oninput="maybeLive()">
+
+    <label>Photo URL 照片链接 (optional)</label>
+    <input type="text" id="in-img" placeholder="https://... (leave blank to use initials)" oninput="maybeLive()">
+    <div class="hint">No photo? Leave blank — your initial shows in a circle. To use a photo, upload it somewhere public (e.g. your website) and paste the direct image link.</div>
+
+    <label>Language 语言</label>
+    <div class="lang-btns">
+      <button class="lang-btn active" id="lang-zh" onclick="setLang('zh')">华语 Chinese</button>
+      <button class="lang-btn" id="lang-en" onclick="setLang('en')">English</button>
+    </div>
+
+    <button class="gen-btn" onclick="generate()">Generate my link 🔗</button>
+  </div>
+
+  <div class="section out" id="out">
+    <div class="section-title">Your Personalized Link</div>
+    <div class="link-box" id="link-box"></div>
+    <div class="row-btns">
+      <button class="act-btn act-copy" onclick="copyLink()">📋 Copy link</button>
+      <button class="act-btn act-wa" onclick="waShare()">Share on WhatsApp</button>
+    </div>
+
+    <div class="qr-wrap">
+      <img id="qr" alt="QR code" src="">
+      <div class="qr-cap">Save this QR for name cards, flyers, or events 名片/传单/活动用</div>
+    </div>
+
+    <div class="section-title" style="margin-top:20px">Ready-to-send Intro 现成的开场白</div>
+    <div class="intro-box" id="intro-box"></div>
+    <button class="act-btn act-copy" style="width:100%;margin-top:10px" onclick="copyIntro()">📋 Copy intro message</button>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Setup (Team Lead Only)</div>
+    <details>
+      <summary>Where are the calculators hosted?</summary>
+      <div class="setup" style="margin-top:10px">
+        After you host the two calculator files online, paste their links below. This generator will append each agent's details automatically. These stay saved on this page only.
+      </div>
+      <label style="margin-top:14px">华语 (Chinese) calculator URL</label>
+      <input type="text" id="base-zh" placeholder="https://your-site.com/CI_Calculator_ZH.html">
+      <label>English calculator URL</label>
+      <input type="text" id="base-en" placeholder="https://your-site.com/CI_Calculator_EN.html">
+    </details>
+  </div>
+
+  <div class="footer">TRT Advisory internal use. Each agent generates their own link.</div>
+</div>
+
+<script>
+// ============================================================
+//  TEAM LEAD: after hosting, set these two once and re-share.
+//  Agents then don't need to touch the Setup panel at all.
+// ============================================================
+const DEFAULT_BASE = {
+  zh: '',  // e.g. 'https://your-site.com/CI_Calculator_ZH.html'
+  en: ''   // e.g. 'https://your-site.com/CI_Calculator_EN.html'
+};
+
+let lang = 'zh';
+let lastLink = '';
+
+function setLang(l) {
+  lang = l;
+  document.getElementById('lang-zh').classList.toggle('active', l==='zh');
+  document.getElementById('lang-en').classList.toggle('active', l==='en');
+  if (document.getElementById('out').style.display === 'block') generate();
+}
+
+function getBase() {
+  const field = document.getElementById(lang==='zh' ? 'base-zh' : 'base-en').value.trim();
+  return field || DEFAULT_BASE[lang];
+}
+
+function generate() {
+  const name  = document.getElementById('in-name').value.trim();
+  const phone = document.getElementById('in-phone').value.replace(/[^0-9]/g, '');
+  const title = document.getElementById('in-title').value.trim();
+  const img   = document.getElementById('in-img').value.trim();
+
+  if (!name)  { alert('Please enter your name 请填写名字'); return; }
+  if (!phone) { alert('Please enter your WhatsApp number 请填写号码'); return; }
+
+  const base = getBase();
+  if (!base) {
+    alert('No calculator URL set yet.\n\nOpen "Setup" below and paste the hosted calculator link first. (Team lead does this once.)');
+    return;
+  }
+
+  const q = new URLSearchParams();
+  q.set('n', name);
+  q.set('p', phone);
+  if (title) q.set('t', title);
+  if (img)   q.set('img', img);
+
+  const link = base + (base.includes('?') ? '&' : '?') + q.toString();
+  lastLink = link;
+
+  document.getElementById('link-box').textContent = link;
+  document.getElementById('qr').src =
+    'https://api.qrserver.com/v1/create-qr-code/?size=360x360&margin=10&data=' + encodeURIComponent(link);
+
+  const intro = lang==='zh'
+    ? `Hi 👋 我是 ${name}${title ? '（'+title+'）' : ''}。\n\n分享一个小工具给你 — 30 秒看看你的疾病保障够不够 👇\n\n${link}\n\n有问题随时问我 🙏`
+    : `Hi 👋 I'm ${name}${title ? ' ('+title+')' : ''}.\n\nSharing a quick tool — check in 30 seconds whether your critical illness coverage is enough 👇\n\n${link}\n\nAsk me anything!`;
+  document.getElementById('intro-box').textContent = intro;
+
+  document.getElementById('out').style.display = 'block';
+}
+
+function maybeLive() {
+  if (document.getElementById('out').style.display === 'block') {
+    const name = document.getElementById('in-name').value.trim();
+    const phone = document.getElementById('in-phone').value.replace(/[^0-9]/g,'');
+    if (name && phone) generate();
+  }
+}
+
+function copyLink() {
+  navigator.clipboard.writeText(lastLink).then(
+    ()=>toast('Link copied ✅'),
+    ()=>prompt('Copy this link:', lastLink)
+  );
+}
+
+function copyIntro() {
+  const t = document.getElementById('intro-box').textContent;
+  navigator.clipboard.writeText(t).then(
+    ()=>toast('Intro copied ✅'),
+    ()=>prompt('Copy this:', t)
+  );
+}
+
+function waShare() {
+  const t = document.getElementById('intro-box').textContent;
+  window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank');
+}
+
+function toast(msg) {
+  const d = document.createElement('div');
+  d.textContent = msg;
+  d.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;z-index:99;box-shadow:0 4px 12px rgba(0,0,0,0.2)';
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(), 1800);
+}
+</script>
+</body>
+</html>
