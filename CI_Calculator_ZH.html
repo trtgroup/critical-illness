@@ -64,10 +64,15 @@
   .agent-title { font-size: 12px; color: #6b7280; margin-top: 2px; line-height: 1.4; }
   .share-btn { display: block; width: 100%; margin-top: 10px; padding: 11px; background: #f3f4f6; color: #374151; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; }
   .share-btn:active { background: #e5e7eb; }
-  .prospect-label { display: block; font-size: 12px; font-weight: 700; color: #374151; margin-bottom: 6px; line-height: 1.5; }
-  .prospect-input { width: 100%; padding: 12px 14px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px; font-family: inherit; margin-bottom: 4px; }
-  .prospect-input:focus { outline: none; border-color: #111827; }
-  .prospect-hint { font-size: 11px; color: #9ca3af; margin-bottom: 14px; line-height: 1.5; }
+  .agent-tool { background: #f9fafb; border: 1px solid #eef1f4; border-radius: 14px; padding: 16px 16px 14px; margin-top: 4px; }
+  .agent-tool-eyebrow { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: #6b7280; background: #eef1f4; padding: 4px 9px; border-radius: 999px; margin-bottom: 12px; }
+  .field-title { font-size: 13px; font-weight: 700; color: #111827; margin-bottom: 8px; }
+  .phone-field { position: relative; }
+  .phone-field svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); width: 17px; height: 17px; fill: #9ca3af; pointer-events: none; }
+  .phone-field input { width: 100%; padding: 13px 14px 13px 40px; border: 1.5px solid #e5e7eb; border-radius: 11px; font-size: 15px; font-family: inherit; background: #fff; color: #111827; transition: border-color 0.15s, box-shadow 0.15s; }
+  .phone-field input::placeholder { color: #b6bcc4; }
+  .phone-field input:focus { outline: none; border-color: #111827; box-shadow: 0 0 0 3px rgba(17,24,39,0.06); }
+  .prospect-hint { font-size: 11px; color: #9ca3af; margin-top: 9px; line-height: 1.55; }
   #family-fields { display: none; }
 </style>
 </head>
@@ -203,9 +208,15 @@
         <div class="agent-title" id="agent-title"></div>
       </div>
     </div>
-    <label class="prospect-label">📲 客户 WhatsApp 号码 · Prospect's number（顾问填，可留空）</label>
-    <input type="text" class="prospect-input" id="prospect-phone" placeholder="例：60123456789（60 开头，不要 + 或空格）" oninput="refreshCtas()">
-    <div class="prospect-hint">填了客户号码 → 结果直接发给客户（由你发出）。留空 → 客户自己把缺口发给你。</div>
+    <div class="agent-tool">
+      <span class="agent-tool-eyebrow">仅限顾问 · Agent use</span>
+      <div class="field-title">客户 WhatsApp 号码 · Prospect's WhatsApp</div>
+      <div class="phone-field">
+        <svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.3 21 3 13.7 3 4.5c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.4 0 .8-.3 1l-2.2 2.2z"/></svg>
+        <input type="text" id="prospect-phone" placeholder="60123456789" oninput="refreshCtas()">
+      </div>
+      <div class="prospect-hint">填了 → 结果由你发给客户 · 留空 → 客户把缺口发给你</div>
+    </div>
     <button class="wa-btn" onclick="sendWhatsApp()">
       <svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5 4.5.7.3 1.2.5 1.7.6.7.2 1.3.2 1.8.1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3z"/><path d="M12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.4 1.3 4.9L2 22l5.3-1.4c1.4.8 3 1.2 4.7 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2zm0 18c-1.5 0-3-.4-4.3-1.2l-.3-.2-3.1.8.8-3-.2-.3C4 15 3.5 13.5 3.5 12 3.5 7.3 7.3 3.5 12 3.5S20.5 7.3 20.5 12 16.7 20 12 20z"/></svg>
       <span id="agent-btn-label">把我的缺口发给顾问</span>
