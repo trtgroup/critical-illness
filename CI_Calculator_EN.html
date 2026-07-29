@@ -64,6 +64,10 @@
   .agent-title { font-size: 12px; color: #6b7280; margin-top: 2px; line-height: 1.4; }
   .share-btn { display: block; width: 100%; margin-top: 10px; padding: 11px; background: #f3f4f6; color: #374151; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; }
   .share-btn:active { background: #e5e7eb; }
+  .prospect-label { display: block; font-size: 12px; font-weight: 700; color: #374151; margin-bottom: 6px; line-height: 1.5; }
+  .prospect-input { width: 100%; padding: 12px 14px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px; font-family: inherit; margin-bottom: 4px; }
+  .prospect-input:focus { outline: none; border-color: #111827; }
+  .prospect-hint { font-size: 11px; color: #9ca3af; margin-bottom: 14px; line-height: 1.5; }
 </style>
 </head>
 <body>
@@ -165,7 +169,7 @@
     </div>
     <div class="result-summary" id="result-summary"></div>
     <!-- Emotional-peak CTA: appears only when an agent is linked -->
-    <button class="wa-btn" id="cta-top" onclick="contactAgent()" style="display:none">
+    <button class="wa-btn" id="cta-top" onclick="sendWhatsApp()" style="display:none">
       <svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5 4.5.7.3 1.2.5 1.7.6.7.2 1.3.2 1.8.1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3z"/><path d="M12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.4 1.3 4.9L2 22l5.3-1.4c1.4.8 3 1.2 4.7 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2zm0 18c-1.5 0-3-.4-4.3-1.2l-.3-.2-3.1.8.8-3-.2-.3C4 15 3.5 13.5 3.5 12 3.5 7.3 7.3 3.5 12 3.5S20.5 7.3 20.5 12 16.7 20 12 20z"/></svg>
       <span id="cta-top-label">Gap this big? Let's talk</span>
     </button>
@@ -198,9 +202,12 @@
         <div class="agent-title" id="agent-title"></div>
       </div>
     </div>
-    <button class="wa-btn" onclick="contactAgent()">
+    <label class="prospect-label">📲 Prospect's WhatsApp number (agent only — optional)</label>
+    <input type="text" class="prospect-input" id="prospect-phone" placeholder="e.g. 60123456789 (start with 60, no + or spaces)" oninput="refreshCtas()">
+    <div class="prospect-hint">Enter a prospect's number → result is sent to them (from you). Leave blank → the prospect sends their gap to you.</div>
+    <button class="wa-btn" onclick="sendWhatsApp()">
       <svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5 4.5.7.3 1.2.5 1.7.6.7.2 1.3.2 1.8.1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3z"/><path d="M12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.4 1.3 4.9L2 22l5.3-1.4c1.4.8 3 1.2 4.7 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2zm0 18c-1.5 0-3-.4-4.3-1.2l-.3-.2-3.1.8.8-3-.2-.3C4 15 3.5 13.5 3.5 12 3.5 7.3 7.3 3.5 12 3.5S20.5 7.3 20.5 12 16.7 20 12 20z"/></svg>
-      <span>Send my gap to my advisor</span>
+      <span id="agent-btn-label">Send my gap to my advisor</span>
     </button>
     <button class="share-btn" onclick="shareTool()">🔗 Share this calculator</button>
   </div>
@@ -240,33 +247,81 @@ function initAgent() {
   }
   if (agent.phone) {
     document.getElementById('cta-top').style.display = 'flex';
-    document.getElementById('cta-top-label').textContent = 'Gap this big? Talk to ' + agent.name;
   }
+  refreshCtas();
 }
 
-function buildMessage() {
+function gapFigures() {
   const income  = +document.getElementById('income').value;
   const months  = +document.getElementById('months').value;
   const ci      = +document.getElementById('ci').value;
   const need    = mode==='working' ? income*months
                  : (+document.getElementById('expense').value)*months + (+document.getElementById('rehab').value);
   const gap     = Math.max(0, need - ci);
+  return { months, ci, need, gap };
+}
+
+// Prospect → agent (used when no prospect number is entered — inbound lead)
+function buildMessage() {
+  const f = gapFigures();
   return `Hi ${agent.name} 👋
 I just used your CI Coverage Gap Calculator:
 
 🦠 Illness: ${currentIllness}
-📅 Recovery: ${months} months
-💰 Total need: ${fmtRM(need)}
-🛡️ Existing cover: ${fmtRM(ci)}
-⚠️ Gap: ${fmtRM(gap)}
+📅 Recovery: ${f.months} months
+💰 Total need: ${fmtRM(f.need)}
+🛡️ Existing cover: ${fmtRM(f.ci)}
+⚠️ Gap: ${fmtRM(f.gap)}
 
 I'd like to understand how to close this gap. Thanks!`;
 }
 
-function contactAgent() {
-  if (!agent.phone) { shareTool(); return; }
-  const url = 'https://wa.me/' + agent.phone + '?text=' + encodeURIComponent(buildMessage());
-  window.open(url, '_blank');
+// Agent → prospect (used when the agent enters the prospect's number)
+function buildProspectMessage() {
+  const f = gapFigures();
+  return `Hi 👋 Here's the CI coverage gap we worked out:
+
+🦠 Illness: ${currentIllness}
+📅 Recovery: ${f.months} months
+💰 Total need: ${fmtRM(f.need)}
+🛡️ Existing cover: ${fmtRM(f.ci)}
+⚠️ Gap: ${fmtRM(f.gap)}
+
+Worth sitting down to plan how to close this. Happy to walk you through it 👍
+
+— ${agent.name}`;
+}
+
+function getProspectPhone() {
+  const el = document.getElementById('prospect-phone');
+  return el ? el.value.replace(/[^0-9]/g, '') : '';
+}
+
+// Updates both button labels based on whether a prospect number is entered
+function refreshCtas() {
+  const prospect = getProspectPhone();
+  const agentBtn = document.getElementById('agent-btn-label');
+  const topLabel = document.getElementById('cta-top-label');
+  if (prospect) {
+    if (agentBtn) agentBtn.textContent = 'Send result to prospect →';
+    if (topLabel) topLabel.textContent = 'Send this gap to the prospect';
+  } else {
+    if (agentBtn) agentBtn.textContent = 'Send my gap to my advisor';
+    if (topLabel) topLabel.textContent = 'Gap this big? Talk to ' + (agent.name || 'me');
+  }
+}
+
+function sendWhatsApp() {
+  const prospect = getProspectPhone();
+  if (prospect) {
+    // Agent sends the result to the prospect
+    window.open('https://wa.me/' + prospect + '?text=' + encodeURIComponent(buildProspectMessage()), '_blank');
+  } else if (agent.phone) {
+    // Prospect sends their result to the agent
+    window.open('https://wa.me/' + agent.phone + '?text=' + encodeURIComponent(buildMessage()), '_blank');
+  } else {
+    shareTool();
+  }
 }
 
 function shareTool() {
